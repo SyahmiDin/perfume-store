@@ -88,9 +88,9 @@ export default async function Home() {
       </div>
 
       {/* Bahagian Footer */}
-      <footer className="mt-16 border-t border-gray-200 bg-white pt-8 pb-8 text-center">
-        <p className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Nama Syarikat Rakan Anda. Hak Cipta Terpelihara.
+      <footer className="mt-16 border-t border-gray-200 bg-[#001a00] pt-8 pb-8 text-center">
+        <p className="text-gray-50 text-sm">
+          &copy; {new Date().getFullYear()} Muaz Perfume. Hak Cipta Terpelihara.
         </p>
       </footer>
     </main>

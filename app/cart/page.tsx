@@ -9,23 +9,36 @@ export default function CartPage() {
   const { cart, removeFromCart, cartTotal } = useCart();
   const [loading, setLoading] = useState(false);
 
-  // Fungsi memproses bayaran pukal
+  // Menyimpan data borang pelanggan
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+
   const handleBulkCheckout = async () => {
     if (cart.length === 0) return;
+    
+    // SISTEM PENGAWAL: Pastikan pelanggan isi semua borang sebelum proses
+    if (!customerName || !customerEmail || !customerPhone) {
+      alert('Sila isi semua maklumat anda (Nama, Email, dan Nombor WhatsApp) sebelum membuat bayaran.');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      // Gabungkan nama semua barang untuk deskripsi bil Toyyibpay (Contoh: "Oud Al-Layl (x2), Citrus (x1)")
       const productNames = cart.map(item => `${item.name} (x${item.quantity})`).join(', ');
 
-      // Panggil API pencipta bil yang kita bina sebelum ini
       const response = await fetch('/api/create-bill', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productName: 'Pesanan Troli Minyak Wangi',
+          productName: 'Troli Minyak Wangi',
           price: cartTotal,
           description: productNames,
+          // Hantar data ini ke API kita
+          customerName: customerName,
+          customerEmail: customerEmail,
+          customerPhone: customerPhone,
         }),
       });
 
@@ -50,7 +63,6 @@ export default function CartPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center md:text-left">Troli Membeli-belah</h1>
 
         {cart.length === 0 ? (
-          // Paparan jika troli kosong
           <div className="bg-white p-10 rounded-xl shadow-sm text-center border border-gray-100">
             <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -61,10 +73,8 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          // Paparan jika ada barang dalam troli
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Senarai Barang (Kiri) */}
             <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
                 <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
@@ -87,10 +97,46 @@ export default function CartPage() {
               ))}
             </div>
 
-            {/* Ringkasan Bayaran (Kanan) */}
+            {/* Ruangan Kanan: Borang Pelanggan & Ringkasan */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit sticky top-10">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Ringkasan Pesanan</h2>
-              <div className="space-y-3 mb-6 text-gray-600">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Maklumat Pelanggan</h2>
+              
+              {/* Borang Input */}
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Nama Penuh</label>
+                  <input 
+                    type="text" 
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Sila masukkan nama..." 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#003300]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Email</label>
+                  <input 
+                    type="email" 
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="contoh@email.com" 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black  focus:outline-none focus:ring-2 focus:ring-[#003300]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">No. WhatsApp</label>
+                  <input 
+                    type="tel" 
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="0123456789" 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#003300]"
+                  />
+                </div>
+              </div>
+
+              <h2 className="text-lg font-bold text-gray-800 mb-3 border-b pb-2">Ringkasan</h2>
+              <div className="space-y-2 mb-6 text-gray-600 text-sm">
                 <div className="flex justify-between">
                   <span>Jumlah Kasar:</span>
                   <span>RM {cartTotal.toFixed(2)}</span>
@@ -100,7 +146,7 @@ export default function CartPage() {
                   <span className="text-green-600 font-medium">Percuma</span>
                 </div>
                 <hr className="my-2 border-gray-200" />
-                <div className="flex justify-between text-lg font-bold text-gray-900">
+                <div className="flex justify-between text-base font-bold text-gray-900">
                   <span>Jumlah Keseluruhan:</span>
                   <span className="text-[#003300]">RM {cartTotal.toFixed(2)}</span>
                 </div>
@@ -109,8 +155,8 @@ export default function CartPage() {
               <button 
                 onClick={handleBulkCheckout}
                 disabled={loading}
-                className={`w-full py-3 rounded-md font-medium text-white transition-colors duration-200 
-                  ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003300] hover:bg-[#002200]'}`}
+                className={`w-full py-3 rounded-md font-medium text-white transition-colors duration-200 shadow-md
+                  ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003300] hover:cursor-pointer hover:bg-[#002200]'}`}
               >
                 {loading ? 'Menyediakan Bil...' : 'Teruskan Pembayaran'}
               </button>
